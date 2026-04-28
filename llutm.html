@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Convert between latitude/longitude and UTM coordinates with elevation data">
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Coord Converter">
+    <title>Coordinate Converter - UTM & Lat/Lon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .button-group button {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .gps-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gps-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #eee;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .result-value {
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            word-break: break-all;
+            text-align: right;
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .offline-notice {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="offline-notice">
+            📱 <strong>Offline Mode:</strong> GPS and elevation features require internet connection
+        </div>
+
+        <h1>🧭 Coordinate Converter</h1>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('lat-to-utm')">Lat/Lon → UTM</button>
+            <button class="tab-btn" onclick="switchTab('utm-to-lat')">UTM → Lat/Lon</button>
+        </div>
+
+        <!-- Tab 1: Lat/Lon to UTM -->
+        <div id="lat-to-utm" class="tab-content active">
+            <form onsubmit="convertLatLonToUTM(event)">
+                <div class="form-group">
+                    <label>Latitude (°)</label>
+                    <input type="number" id="lat" placeholder="e.g., 40.7128" step="0.00001" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Longitude (°)</label>
+                    <input type="number" id="lon" placeholder="e.g., -74.0060" step="0.00001" required>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit">Convert to UTM</button>
+                    <button type="button" class="gps-btn" id="gps-btn" onclick="getCurrentLocation()">📍 Use GPS</button>
+                </div>
+
+                <div class="error" id="error-lat-lon"></div>
+            </form>
+
+            <div class="result-box" id="result-lat-lon">
+                <div class="result-item">
+                    <span class="result-label">Zone</span>
+                    <span class="result-value" id="result-zone"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Easting (m)</span>
+                    <span class="result-value" id="result-easting"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Northing (m)</span>
+                    <span class="result-value" id="result-northing"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Elevation (ft)</span>
+                    <span class="result-value" id="result-elevation-lat-lon">Offline</span>
+                </div>
+            </div>
+            <p class="info-text">Enter decimal degrees (negative for South/West)</p>
+        </div>
+
+        <!-- Tab 2: UTM to Lat/Lon -->
+        <div id="utm-to-lat" class="tab-content">
+            <form onsubmit="convertUTMToLatLon(event)">
+                <div class="form-group">
+                    <label>UTM Zone</label>
+                    <input type="text" id="utm-zone" placeholder="e.g., 33U or 33" maxlength="4" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Easting (m)</label>
+                    <input type="number" id="utm-easting" placeholder="e.g., 500000" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Northing (m)</label>
+                    <input type="number" id="utm-northing" placeholder="e.g., 4500000" step="1" required>
+                </div>
+
+                <button type="submit">Convert to Lat/Lon</button>
+
+                <div class="error" id="error-utm"></div>
+            </form>
+
+            <div class="result-box" id="result-utm">
+                <div class="result-item">
+                    <span class="result-label">Latitude (°)</span>
+                    <span class="result-value" id="result-lat-value"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Longitude (°)</span>
+                    <span class="result-value" id="result-lon-value"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Elevation (ft)</span>
+                    <span class="result-value" id="result-elevation-utm">Offline</span>
+                </div>
+            </div>
+            <p class="info-text">Zone format: number (1-60) or with letter (1U, 33U, etc.)</p>
+        </div>
+    </div>
+
+    <script>
+        // UTM Conversion Functions using proven USGS algorithms
+        // Based on formulas from USGS Professional Paper 1395
+
+        const WGS84_A = 6378137.0; // Earth's semi-major axis in meters
+        const WGS84_E2 = 0.00669438; // First eccentricity squared
+        const K0 = 0.9996; // Scale factor
+
+        function getUTMZoneLetter(lat) {
+            // Get zone letter from latitude
+            if (lat >= -80 && lat <= 84) {
+                const letters = 'CDEFGHJKLMNPQRSTUVWX';
+                return letters[Math.floor((lat + 80) / 8)];
+            }
+            return 'Z';
+        }
+
+        function calcN(lat) {
+            const latRad = lat * Math.PI / 180;
+            const e2 = WGS84_E2;
+            return WGS84_A / Math.sqrt(1 - e2 * Math.sin(latRad) * Math.sin(latRad));
+        }
+
+        function calcT(lat) {
+            const latRad = lat * Math.PI / 180;
+            return Math.tan(latRad) * Math.tan(latRad);
+        }
+
+        function calcC(lon, zoneNumber) {
+            const lonRad = lon * Math.PI / 180;
+            const lonOrigin = (zoneNumber - 1) * 6 - 180 + 3;
+            const lonOriginRad = lonOrigin * Math.PI / 180;
+            const e2p = WGS84_E2 / (1 - WGS84_E2);
+            const lonDiff = (lonRad - lonOriginRad);
+            return e2p * Math.cos(lonRad) * Math.cos(lonRad) * Math.cos(lonDiff) * Math.cos(lonDiff);
+        }
+
+        function calcA(lon, zoneNumber) {
+            const lonRad = lon * Math.PI / 180;
+            const lonOrigin = (zoneNumber - 1) * 6 - 180 + 3;
+            const lonOriginRad = lonOrigin * Math.PI / 180;
+            const latRad = 0; // Not used for this calc
+            return Math.cos(latRad) * ((lonRad - lonOriginRad) % (2 * Math.PI));
+        }
+
+        function calcM(lat) {
+            const latRad = lat * Math.PI / 180;
+            const e2 = WGS84_E2;
+            const e4 = e2 * e2;
+            const e6 = e4 * e2;
+
+            return WGS84_A * (
+                (1 - e2 / 4 - 3 * e4 / 64 - 5 * e6 / 256) * latRad -
+                (3 * e2 / 8 + 3 * e4 / 32 - 45 * e6 / 1024) * Math.sin(2 * latRad) +
+                (15 * e4 / 256 - 45 * e6 / 1024) * Math.sin(4 * latRad) -
+                (35 * e6 / 3072) * Math.sin(6 * latRad)
+            );
+        }
+
+        function latLonToUTM(lat, lon) {
+            const zoneNumber = Math.floor((lon + 180) / 6) + 1;
+            const zoneLetter = getUTMZoneLetter(lat);
+
+            const latRad = lat * Math.PI / 180;
+            const lonRad = lon * Math.PI / 180;
+            const lonOrigin = (zoneNumber - 1) * 6 - 180 + 3;
+            const lonOriginRad = lonOrigin * Math.PI / 180;
+
+            const N = calcN(lat);
+            const T = calcT(lat);
+            const C = WGS84_E2 / (1 - WGS84_E2) * Math.cos(latRad) * Math.cos(latRad);
+            const A = Math.cos(latRad) * ((lonRad - lonOriginRad) % (2 * Math.PI));
+            const M = calcM(lat);
+
+            const easting = K0 * N * (A + (A * A * A / 6) * (1 - T + C) +
+                (Math.pow(A, 5) / 120) * (1 - 18 * T + T * T + 72 * C - 58 * (WGS84_E2 / (1 - WGS84_E2)))) + 500000;
+
+            const northing = K0 * (M + N * Math.tan(latRad) *
+                ((A * A / 2) + (Math.pow(A, 4) / 24) * (5 - T + 9 * C + 4 * C * C) +
+                    (Math.pow(A, 6) / 720) * (61 - 58 * T + T * T + 600 * C - 330 * (WGS84_E2 / (1 - WGS84_E2)))));
+
+            return {
+                zone: zoneNumber + zoneLetter,
+                easting: easting,
+                northing: lat < 0 ? northing + 10000000 : northing
+            };
+        }
+
+        function utmToLatLon(zoneStr, easting, northing) {
+            let zoneNumber = parseInt(zoneStr);
+            let zoneLetter = zoneStr.replace(/[0-9]/g, '').toUpperCase();
+
+            if (isNaN(zoneNumber) || zoneNumber < 1 || zoneNumber > 60) {
+                throw new Error('Zone number must be between 1 and 60');
+            }
+
+            const lonOrigin = (zoneNumber - 1) * 6 - 180 + 3;
+            const e2 = WGS84_E2;
+            const e2p = e2 / (1 - e2);
+
+            // Adjust northing for southern hemisphere
+            let M = northing;
+            if (zoneLetter && zoneLetter < 'N') {
+                M = northing - 10000000;
+            }
+
+            const mu = M / (WGS84_A * K0 * (1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 * e2 * e2 / 256));
+
+            const footLatRad = mu +
+                (3 * e2 / 8 + 3 * e2 * e2 / 32 - 45 * e2 * e2 * e2 / 1024) * Math.sin(2 * mu) +
+                (15 * e2 * e2 / 256 - 45 * e2 * e2 * e2 / 1024) * Math.sin(4 * mu) +
+                (35 * e2 * e2 * e2 / 3072) * Math.sin(6 * mu);
+
+            const C1 = e2p * Math.cos(footLatRad) * Math.cos(footLatRad);
+            const T1 = Math.tan(footLatRad) * Math.tan(footLatRad);
+            const N1 = WGS84_A / Math.sqrt(1 - e2 * Math.sin(footLatRad) * Math.sin(footLatRad));
+            const R1 = WGS84_A * (1 - e2) / Math.sqrt(Math.pow(1 - e2 * Math.sin(footLatRad) * Math.sin(footLatRad), 3));
+            const D = (easting - 500000) / (N1 * K0);
+
+            const lat = footLatRad - (N1 * Math.tan(footLatRad) / R1) *
+                (D * D / 2 - (Math.pow(D, 4) / 24) * (5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * e2p) +
+                    (Math.pow(D, 6) / 720) * (61 + 90 * T1 + 28 * T1 * T1 + 45 * T1 * T1 * T1 - 252 * e2p - 3 * C1 * C1));
+
+            const lon = (D - (Math.pow(D, 3) / 6) * (1 + 2 * T1 + C1) +
+                (Math.pow(D, 5) / 120) * (5 - 2 * C1 + 28 * T1 - 3 * C1 * C1 + 8 * e2p + 24 * T1 * T1)) / Math.cos(footLatRad);
+
+            return {
+                lat: lat * 180 / Math.PI,
+                lon: lonOrigin + lon * 180 / Math.PI
+            };
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active to clicked button
+            event.target.classList.add('active');
+        }
+
+        async function getElevation(lat, lon, elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = 'Loading...';
+
+            try {
+                // Using Open-Elevation API (free, no API key required)
+                const response = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`);
+
+                if (!response.ok) {
+                    throw new Error('Elevation service unavailable');
+                }
+
+                const data = await response.json();
+
+                if (data.results && data.results.length > 0) {
+                    // Convert meters to feet
+                    const elevationFeet = Math.round(data.results[0].elevation * 3.28084);
+                    element.textContent = elevationFeet.toLocaleString();
+                } else {
+                    element.textContent = 'N/A';
+                }
+            } catch (error) {
+                console.error('Elevation fetch error:', error);
+                element.textContent = 'Offline';
+            }
+        }
+
+        function convertLatLonToUTM(e) {
+            e.preventDefault();
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
+            const errorEl = document.getElementById('error-lat-lon');
+
+            try {
+                errorEl.classList.remove('show');
+
+                if (lat < -90 || lat > 90) {
+                    throw new Error('Latitude must be between -90 and 90');
+                }
+                if (lon < -180 || lon > 180) {
+                    throw new Error('Longitude must be between -180 and 180');
+                }
+
+                const result = latLonToUTM(lat, lon);
+
+                document.getElementById('result-zone').textContent = result.zone;
+                document.getElementById('result-easting').textContent = Math.round(result.easting);
+                document.getElementById('result-northing').textContent = Math.round(result.northing);
+
+                document.getElementById('result-lat-lon').classList.add('show');
+
+                // Get elevation (will show "Offline" if no internet)
+                getElevation(lat, lon, 'result-elevation-lat-lon');
+            } catch (error) {
+                errorEl.textContent = '❌ ' + error.message;
+                errorEl.classList.add('show');
+                document.getElementById('result-lat-lon').classList.remove('show');
+            }
+        }
+
+        function convertUTMToLatLon(e) {
+            e.preventDefault();
+            const zoneStr = document.getElementById('utm-zone').value.toUpperCase();
+            const easting = parseFloat(document.getElementById('utm-easting').value);
+            const northing = parseFloat(document.getElementById('utm-northing').value);
+            const errorEl = document.getElementById('error-utm');
+
+            try {
+                errorEl.classList.remove('show');
+
+                const result = utmToLatLon(zoneStr, easting, northing);
+
+                document.getElementById('result-lat-value').textContent = result.lat.toFixed(5);
+                document.getElementById('result-lon-value').textContent = result.lon.toFixed(5);
+
+                document.getElementById('result-utm').classList.add('show');
+
+                // Get elevation (will show "Offline" if no internet)
+                getElevation(result.lat, result.lon, 'result-elevation-utm');
+            } catch (error) {
+                errorEl.textContent = '❌ ' + error.message;
+                errorEl.classList.add('show');
+                document.getElementById('result-utm').classList.remove('show');
+            }
+        }
+
+        function getCurrentLocation() {
+            const gpsBtn = document.getElementById('gps-btn');
+            const errorEl = document.getElementById('error-lat-lon');
+
+            // Check if geolocation is supported
+            if (!navigator.geolocation) {
+                errorEl.textContent = '❌ Geolocation is not supported by your browser';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            // Disable button during request
+            gpsBtn.disabled = true;
+            gpsBtn.textContent = '⏳ Fetching...';
+            errorEl.classList.remove('show');
+
+            // Request user's location
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Success callback
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    // Populate input fields
+                    document.getElementById('lat').value = lat.toFixed(8);
+                    document.getElementById('lon').value = lon.toFixed(8);
+
+                    // Show accuracy info
+                    errorEl.innerHTML = `✅ Location loaded (Accuracy: ±${Math.round(accuracy)}m)`;
+                    errorEl.style.background = '#efe';
+                    errorEl.style.color = '#3a3';
+                    errorEl.classList.add('show');
+
+                    // Reset button
+                    gpsBtn.disabled = false;
+                    gpsBtn.textContent = '📍 Use GPS';
+
+                    // Auto-convert after a short delay
+                    setTimeout(() => {
+                        document.querySelector('#lat-to-utm form').dispatchEvent(new Event('submit'));
+                    }, 500);
+                },
+                function(error) {
+                    // Error callback
+                    let errorMessage = '';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Location permission denied. Please enable GPS in settings.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information is unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Location request timed out.';
+                            break;
+                        default:
+                            errorMessage = 'An error occurred while fetching location.';
+                    }
+                    errorEl.textContent = '❌ ' + errorMessage;
+                    errorEl.style.background = '#fee';
+                    errorEl.style.color = '#c33';
+                    errorEl.classList.add('show');
+
+                    // Reset button
+                    gpsBtn.disabled = false;
+                    gpsBtn.textContent = '📍 Use GPS';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Register service worker for offline functionality (if supported)
+        if ('serviceWorker' in navigator) {
+            // Create inline service worker
+            const swCode = `
+                const CACHE_NAME = 'coord-converter-v1';
+                const urlsToCache = ['./'];
+
+                self.addEventListener('install', event => {
+                    event.waitUntil(
+                        caches.open(CACHE_NAME)
+                            .then(cache => cache.addAll(urlsToCache))
+                    );
+                });
+
+                self.addEventListener('fetch', event => {
+                    event.respondWith(
+                        caches.match(event.request)
+                            .then(response => response || fetch(event.request))
+                    );
+                });
+            `;
+
+            // Convert to blob and register
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            const swUrl = URL.createObjectURL(blob);
+
+            navigator.serviceWorker.register(swUrl)
+                .then(registration => {
+                    console.log('ServiceWorker registered for offline use');
+                })
+                .catch(error => {
+                    console.log('ServiceWorker registration failed:', error);
+                });
+        }
+    </script>
+</body>
+</html>
