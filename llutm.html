@@ -232,24 +232,56 @@
             font-style: italic;
         }
 
-        .offline-notice {
-            background: #fff3cd;
-            color: #856404;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
-
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
             }
 
             h1 {
-                font-size: 24px;
+                font-size: 30px;
                 margin-bottom: 20px;
+            }
+
+            .tab-btn {
+                font-size: 16px;
+                padding: 14px 16px;
+            }
+
+            label {
+                font-size: 16px;
+            }
+
+            input[type="number"],
+            input[type="text"],
+            select {
+                font-size: 16px;
+                padding: 14px;
+            }
+
+            button {
+                font-size: 17px;
+                padding: 16px;
+            }
+
+            .button-group button {
+                font-size: 16px;
+                padding: 14px;
+            }
+
+            .result-label {
+                font-size: 15px;
+            }
+
+            .result-value {
+                font-size: 16px;
+            }
+
+            .error {
+                font-size: 15px;
+            }
+
+            .info-text {
+                font-size: 14px;
             }
 
             .input-row {
@@ -264,10 +296,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="offline-notice">
-            📱 <strong>Offline Mode:</strong> GPS and elevation features require internet connection
-        </div>
-
         <h1>🧭 Coordinate Converter</h1>
 
         <div class="tabs">
@@ -280,12 +308,12 @@
             <form onsubmit="convertLatLonToUTM(event)">
                 <div class="form-group">
                     <label>Latitude (°)</label>
-                    <input type="number" id="lat" placeholder="e.g., 40.7128" step="0.00001" required>
+                    <input type="number" id="lat" placeholder="e.g., 40.7128" inputmode="decimal" step="any" required>
                 </div>
 
                 <div class="form-group">
                     <label>Longitude (°)</label>
-                    <input type="number" id="lon" placeholder="e.g., -74.0060" step="0.00001" required>
+                    <input type="number" id="lon" placeholder="e.g., -74.0060" inputmode="decimal" step="any" required>
                 </div>
 
                 <div class="button-group">
@@ -616,9 +644,9 @@
                     const lon = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
 
-                    // Populate input fields
-                    document.getElementById('lat').value = lat.toFixed(8);
-                    document.getElementById('lon').value = lon.toFixed(8);
+                    // Populate input fields with a clean display while allowing precise entry
+                    document.getElementById('lat').value = lat.toFixed(5);
+                    document.getElementById('lon').value = lon.toFixed(5);
 
                     // Show accuracy info
                     errorEl.innerHTML = `✅ Location loaded (Accuracy: ±${Math.round(accuracy)}m)`;
