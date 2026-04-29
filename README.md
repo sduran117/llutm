@@ -13,35 +13,29 @@ A complete, single-file Progressive Web App for converting between latitude/long
 
 ## 📲 Installation on Phone
 
-### Option 1: Direct File (Simplest)
-1. Download or copy `llutm.html` to your phone
-2. Open the file in your browser
-3. Tap "Add to Home Screen" or "Install App"
-4. App appears on your home screen!
+go to this URL or have someone share over text or email 
+https://sduran117.github.io/llutm/llutm.html
 
-### Option 2: Via Text/Email
-1. Send `llutm.html` file via text, email, or messaging app
-2. Recipient taps to open in browser
-3. Recipient adds to home screen
-4. Done! Works like a native app
+Either going to this URL or openined from a message will open the progressive web app (PWA) app in a browser
 
-### Option 3: Web Link (With Internet)
-1. Upload `llutm.html` to any web hosting service
-2. Share the URL with friends
-3. They visit the link and add to home screen
+You can run it in the browser, but it is meant to run as a standalone PWA app
+One your phone, click the "...", then share, then select "Add to Home Screen" - this will install it as
+an app on your phone.  It will run locally, no advertisements, no tracking, does not require internet 
+for quick field LL - UTM conversion.
 
 ## 🚀 How to Use
 
-**On Desktop:**
-- Open `llutm.html` directly in any web browser
-- No server required!
+Open app
+Select Lat/Lon -> UTM ot UTM -> Lat/Lon
+If Lat/Lon -> UTM
+    Enter lat and lon, press 'Convert to UTM' button
+OR
+If running on a phone, to conver the current location from device GPS to UTM, press 'Use GPS' (Note: you 
+may have to allow the app to use location services)
 
-**On Mobile:**
-1. Save or open the HTML file
-2. Browser opens the app
-3. Tap the menu button (⋮)
-4. Select "Add to Home Screen" / "Install App"
-5. Launch from home screen
+If UTM -> Lat/Lon
+    Enter zone, easting, northing
+    Press 'Convert to Lat/Lon'
 
 ## ✨ Features
 
