@@ -232,6 +232,14 @@
             font-style: italic;
         }
 
+        .version-tag {
+            margin-top: 16px;
+            color: #bbb;
+            font-size: 11px;
+            text-align: center;
+            letter-spacing: .04em;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
@@ -308,12 +316,12 @@
             <form onsubmit="convertLatLonToUTM(event)">
                 <div class="form-group">
                     <label>Latitude (°)</label>
-                    <input type="text" id="lat" placeholder="e.g., 40.7128" inputmode="numeric" pattern="[-+]?[0-9]*[\.,]?[0-9]+" autocomplete="off" required>
+                    <input type="text" id="lat" placeholder="e.g., 40.7128" inputmode="text" spellcheck="false" pattern="[-+]?[0-9]*[\.,]?[0-9]+" autocomplete="off" required>
                 </div>
 
                 <div class="form-group">
                     <label>Longitude (°)</label>
-                    <input type="text" id="lon" placeholder="e.g., -74.0060" inputmode="numeric" pattern="[-+]?[0-9]*[\.,]?[0-9]+" autocomplete="off" required>
+                    <input type="text" id="lon" placeholder="e.g., -74.0060" inputmode="text" spellcheck="false" pattern="[-+]?[0-9]*[\.,]?[0-9]+" autocomplete="off" required>
                 </div>
 
                 <div class="button-group">
@@ -384,6 +392,7 @@
             </div>
             <p class="info-text">Zone format: number (1-60) or with letter (1U, 33U, etc.)</p>
         </div>
+        <div class="version-tag">v95b5f18</div>
     </div>
 
     <script>
