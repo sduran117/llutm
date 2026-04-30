@@ -147,37 +147,6 @@
             font-size: 14px;
         }
 
-        .signed-input {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .signed-input input {
-            flex: 1;
-        }
-
-        .sign-toggle {
-            padding: 12px 14px;
-            border: 2px solid #eee;
-            border-radius: 6px;
-            background: #fff;
-            color: #333;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: border-color 0.2s ease, background 0.2s ease;
-        }
-
-        .sign-toggle:hover {
-            border-color: #667eea;
-            background: #eef3ff;
-        }
-
-        .sign-toggle:active {
-            transform: translateY(1px);
-        }
-
         .gps-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
@@ -337,20 +306,14 @@
         <!-- Tab 1: Lat/Lon to UTM -->
         <div id="lat-to-utm" class="tab-content active">
             <form onsubmit="convertLatLonToUTM(event)">
-                        <div class="form-group">
+                <div class="form-group">
                     <label>Latitude (°)</label>
-                    <div class="signed-input">
-                        <input type="text" id="lat" placeholder="e.g., 40.7128" inputmode="numeric" pattern="[-+]?[0-9]*[\.,]?[0-9]+" autocomplete="off" required>
-                        <button type="button" class="sign-toggle" onclick="toggleSign('lat')">±</button>
-                    </div>
+                    <input type="text" id="lat" placeholder="e.g., 40.7128" inputmode="numeric" pattern="[-+]?[0-9]*[\.,]?[0-9]+" autocomplete="off" required>
                 </div>
 
                 <div class="form-group">
                     <label>Longitude (°)</label>
-                    <div class="signed-input">
-                        <input type="text" id="lon" placeholder="e.g., -74.0060" inputmode="numeric" pattern="[-+]?[0-9]*[\.,]?[0-9]+" autocomplete="off" required>
-                        <button type="button" class="sign-toggle" onclick="toggleSign('lon')">±</button>
-                    </div>
+                    <input type="text" id="lon" placeholder="e.g., -74.0060" inputmode="numeric" pattern="[-+]?[0-9]*[\.,]?[0-9]+" autocomplete="off" required>
                 </div>
 
                 <div class="button-group">
@@ -571,28 +534,6 @@
             event.target.classList.add('active');
         }
 
-        function normalizeDecimalValue(value) {
-            return value.trim().replace(',', '.');
-        }
-
-        function toggleSign(fieldId) {
-            const input = document.getElementById(fieldId);
-            let value = input.value.trim();
-            if (!value || value === '+' || value === '-') {
-                input.value = '-';
-                input.focus();
-                return;
-            }
-            if (value.startsWith('-')) {
-                input.value = value.substring(1);
-            } else if (value.startsWith('+')) {
-                input.value = '-' + value.substring(1);
-            } else {
-                input.value = '-' + value;
-            }
-            input.focus();
-        }
-
         async function getElevation(lat, lon, elementId) {
             const element = document.getElementById(elementId);
             element.textContent = 'Loading...';
@@ -622,8 +563,8 @@
 
         function convertLatLonToUTM(e) {
             e.preventDefault();
-            const lat = parseFloat(normalizeDecimalValue(document.getElementById('lat').value));
-            const lon = parseFloat(normalizeDecimalValue(document.getElementById('lon').value));
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
             const errorEl = document.getElementById('error-lat-lon');
 
             try {
